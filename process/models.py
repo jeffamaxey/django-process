@@ -392,7 +392,7 @@ class JobTask(models.Model):
 
     @property
     def ready_to_run(self):
-        return all([p.status in JobTask.ok_status for p in self.get_parents()])
+        return all(p.status in JobTask.ok_status for p in self.get_parents())
 
     @classmethod
     def create(cls, job, task):
@@ -414,7 +414,7 @@ class JobTask(models.Model):
 
     def reopen(self, main=None):
         if main and self.status not in JobTask.can_reopen:
-            raise ValidationError({'status': _(f"can't reopen current status not valid")})
+            raise ValidationError({'status': _("can't reopen current status not valid")})
 
         self.status = JobTask.reopened if main else JobTask.awaiting
         self.save()
@@ -426,14 +426,14 @@ class JobTask(models.Model):
         # check available status
         if self.status not in [i[0] for i in JobTask.status_choices]:
             raise ValidationError({'status': _(f'status requested {status} not in status choices')})
-        
+
         # check if new status is available for current status
         if self.status == JobTask.cancelled and self._status not in JobTask.can_cancel:
-            raise ValidationError({'status': _(f"can't cancel current status not valid")})
+            raise ValidationError({'status': _("can't cancel current status not valid")})
         elif self.status == JobTask.retry and self._status not in JobTask.can_retry:
-            raise ValidationError({'status': _(f"can't retry current status not valid")})
+            raise ValidationError({'status': _("can't retry current status not valid")})
         elif self.status == JobTask.forced and self._status not in JobTask.can_force:
-            raise ValidationError({'status': _(f"can't retry current status not valid")})
+            raise ValidationError({'status': _("can't retry current status not valid")})
 
         # DT_START
         if self.status == JobTask.initialized:

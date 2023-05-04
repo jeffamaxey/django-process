@@ -57,7 +57,7 @@ Highcharts.chart('container-process-{id}', {
 
 
 def get_task_as_node(t):
-    job_task = True if isinstance(t, JobTask) else False
+    job_task = isinstance(t, JobTask)
     node_task = t.task if job_task else t
     color = get_conf(f'diagram__tasks_color__{t.status}') if job_task else get_conf('diagram__tasks_color__default')
     return {
@@ -87,8 +87,7 @@ def diagram(obj):
         nodes.append(get_task_as_node(task))
         tk = task if isinstance(obj, Process) else task.task
         if tk.childs.all().count():
-            for child in tk.childs.all():
-                data.append([str(tk.name), str(child.task.name)])
+            data.extend([str(tk.name), str(child.task.name)] for child in tk.childs.all())
         else:
             data.append([str(tk.name), str(tk.name)])
 

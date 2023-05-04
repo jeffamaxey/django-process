@@ -79,9 +79,8 @@ def finish_jobs():
         all() builtin function will return True if an empty list is passed
         :param plist:
         """
-        if not plist:
-            return False
-        return all(plist)
+        return all(plist) if plist else False
+
     jobs = Job.objects.filter(status__in=Job.unfinished).prefetch_related()
     for job in jobs:
         if custom_all([i.status in JobTask.ok_status for i in job.tasks.all()]):

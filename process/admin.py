@@ -37,9 +37,7 @@ class TaskAdmin(admin.ModelAdmin):
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return self.readonly_fields + ('process',)
-        return self.readonly_fields
+        return self.readonly_fields + ('process',) if obj else self.readonly_fields
 
 
 @admin.register(Job)
@@ -58,9 +56,7 @@ class JobAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Job.objects.all().prefetch_related('process')
-        # TODO: this should be handled by some parameter to the ChangeList.
-        ordering = self.get_ordering(request)
-        if ordering:
+        if ordering := self.get_ordering(request):
             qs = qs.order_by(*ordering)
         return qs
 
@@ -69,9 +65,9 @@ class JobAdmin(admin.ModelAdmin):
         return False
 
     def cancel(self, request, queryset):
-        # check cancelable
-        not_cancelable = [j for j in queryset if j.status not in Job.cancelable]
-        if not_cancelable:
+        if not_cancelable := [
+            j for j in queryset if j.status not in Job.cancelable
+        ]:
             self.message_user(
                 request,
                 ngettext(
@@ -110,9 +106,7 @@ class JobTaskAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = JobTask.objects.all().select_related('job', 'task', 'task__process', 'job__process')
-        # TODO: this should be handled by some parameter to the ChangeList.
-        ordering = self.get_ordering(request)
-        if ordering:
+        if ordering := self.get_ordering(request):
             qs = qs.order_by(*ordering)
         return qs
 

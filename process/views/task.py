@@ -48,11 +48,11 @@ class TaskCreateView(ProcessGenericCreateView):
         if form.is_valid():
             obj = form.save()
             messages.success(request, self.success_message)
-            if not self.redirect_to_edit:
-                return HttpResponseRedirect(self.get_success_url())
-            else:
-                return redirect('process-tasks-update', pk=obj.id)
-
+            return (
+                redirect('process-tasks-update', pk=obj.id)
+                if self.redirect_to_edit
+                else HttpResponseRedirect(self.get_success_url())
+            )
         return self.render_to_response(self.get_context_data(form=form))
 
 

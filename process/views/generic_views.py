@@ -20,7 +20,7 @@ class ProcessSecurity(LoginRequiredMixin, UserPassesTestMixin):
         if hasattr(self, 'permissions'):
             usr = self.request.user
             [logger.debug(f'user {usr.username} permission {i} result {usr.has_perm(i)}') for i in self.permissions]
-            return not any([not self.request.user.has_perm(i) for i in self.permissions])
+            return all(self.request.user.has_perm(i) for i in self.permissions)
         return True
 
 
@@ -33,14 +33,12 @@ class ProcessGenericListView(ProcessSecurity, ListView):
 
     def get_filters_from_request(self):
         # convert set to python dict
-        request_dict = {k: v for k, v in self.request.GET.lists()}
+        request_dict = dict(self.request.GET.lists())
         # search filters in url if filters do exists change key add __in
         return {f'{k}__in': request_dict.get(k) for k in self.filters if request_dict.get(k)}
 
     def get_queryset(self):
-        filters = self.get_filters_from_request()
-
-        if filters:
+        if filters := self.get_filters_from_request():
             return self.model.objects.filter(**filters)
         else:
             return self.model.objects.all()

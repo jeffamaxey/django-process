@@ -21,11 +21,11 @@ class TaskThreaded(Thread):
         try:
             try:
                 # get interpreter the default is the one used to run django
-                if not self.obj.task.interpreter:
-                    cmd = [sys.executable]
-                else:
-                    cmd = self.obj.task.interpreter.split()
-
+                cmd = (
+                    self.obj.task.interpreter.split()
+                    if self.obj.task.interpreter
+                    else [sys.executable]
+                )
                 # noinspection SpellCheckingInspection
                 if self.obj.task.code.file.__class__.__name__ == 'S3Boto3StorageFile':
                     if not os.path.isdir('/tmp/dj_process_tasks'):
